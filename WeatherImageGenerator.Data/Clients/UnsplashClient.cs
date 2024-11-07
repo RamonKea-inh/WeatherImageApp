@@ -22,30 +22,30 @@ namespace WeatherImageGenerator.Data.Clients
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Client-ID {_accessKey}"); // TODO : Move to configuration
         }
 
-        public async Task<Result<UnsplashResponse>> GetRandomPhotoAsync(string query)
+        public async Task<Result<List<UnsplashResponse>>> GetRandomNaturePhotosAsync(string query, int count)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"photos/random?query={query}");
+                var response = await _httpClient.GetAsync($"photos/random?query={query}&count={count}");
                 response.EnsureSuccessStatusCode();
 
                 var unsplashResponse = await response.Content
-                    .ReadFromJsonAsync<UnsplashResponse>();
+                    .ReadFromJsonAsync<List<UnsplashResponse>>();
 
                 if (unsplashResponse == null)
                 {
-                    return Result<UnsplashResponse>.Failure(
+                    return Result<List<UnsplashResponse>>.Failure(
                         "Failed to deserialize Unsplash response",
                         ErrorCode.ImageServiceDeserializationError.ToString());
                 }
 
-                return Result<UnsplashResponse>.Success(unsplashResponse);
+                return Result<List<UnsplashResponse>>.Success(unsplashResponse);
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "Failed to fetch random photo from Unsplash");
-                return Result<UnsplashResponse>.Failure(
-                    "Failed to fetch image from Unsplash",
+                _logger.LogError(ex, "Failed to fetch random nature photos from Unsplash");
+                return Result<List<UnsplashResponse>>.Failure(
+                    "Failed to fetch images from Unsplash",
                     ErrorCode.ImageServiceApiError.ToString());
             }
         }

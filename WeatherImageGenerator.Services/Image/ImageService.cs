@@ -16,25 +16,26 @@ namespace WeatherImageGenerator.Services.Image
             _logger = logger;
         }
 
-        public async Task<Result<string>> GetRandomImageUrlAsync(string query = "nature")
+        public async Task<Result<List<string>>> GetRandomNatureImagesUrlAsync(string query = "nature", int count = 1)
         {
             try
             {
-                var result = await _unsplashClient.GetRandomPhotoAsync(query);
+                var result = await _unsplashClient.GetRandomNaturePhotosAsync(query, count);
                 if (result.IsSuccess && result.Data != null)
                 {
-                    return Result<string>.Success(result.Data.Urls.Full);
+                    var imageUrls = result.Data.Select(img => img.Urls.Regular).ToList();
+                    return Result<List<string>>.Success(imageUrls);
                 }
                 else
                 {
-                    _logger.LogError($"Failed to get random image: {result.Error}");
-                    return Result<string>.Failure(result.Error ?? "Unknown error", result.ErrorCode ?? "ERROR");
+                    _logger.LogError($"Failed to get random images: {result.Error}");
+                    return Result<List<string>>.Failure(result.Error ?? "Unknown error", result.ErrorCode ?? "ERROR");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Exception occurred while getting random image");
-                return Result<string>.Failure("Exception occurred while getting random image", "EXCEPTION");
+                _logger.LogError(ex, "Exception occurred while getting random images");
+                return Result<List<string>>.Failure("Exception occurred while getting random images", "EXCEPTION");
             }
         }
     }
