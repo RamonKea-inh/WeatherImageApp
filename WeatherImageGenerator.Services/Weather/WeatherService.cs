@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using WeatherImageGenerator.Domain.Entities.Weather;
 using WeatherImageGenerator.Domain.Exceptions;
 using WeatherImageGenerator.Domain.Interfaces;
 using WeatherImageGenerator.Domain.Models.Response;
@@ -7,15 +8,15 @@ using WeatherImageGenerator.Domain.Models.Weather;
 
 namespace WeatherImageGenerator.Services.Weather
 {
-    public class BuienradarWeatherService : IWeatherService
+    public class WeatherService : IWeatherService
     {
         private readonly HttpClient _httpClient;
-        private readonly ILogger<BuienradarWeatherService> _logger;
+        private readonly ILogger<WeatherService> _logger;
         private const string BaseUrl = "https://data.buienradar.nl/2.0/feed/json";
 
         public string SourceName => "Buienradar";
 
-        public BuienradarWeatherService(HttpClient httpClient, ILogger<BuienradarWeatherService> logger)
+        public WeatherService(HttpClient httpClient, ILogger<WeatherService> logger)
         {
             _httpClient = httpClient;
             _logger = logger;
@@ -34,11 +35,25 @@ namespace WeatherImageGenerator.Services.Weather
                     throw new WeatherServiceException("Failed to deserialize Buienradar response");
                 }
 
+                var stations = buienradarData.Actual.Stationmeasurements.Select(s => new WeatherStation(
+                    s.Stationid,
+                    s.Stationname,
+                    s.Lat,
+                    s.Lon,
+                    s.Regio,
+                    s.Timestamp,
+                    s.Weatherdescription,
+                    s.Temperature,
+                    s.Feeltemperature,
+                    s.Windspeed,
+                    s.Winddirection
+                )).ToList();
+
                 return new WeatherData
                 {
                     Source = SourceName,
                     LastUpdated = DateTime.UtcNow,
-                    Stations = buienradarData.Stations.ToList(),
+                    Stations = stations,
                     Metadata = new Dictionary<string, string>
                     {
                         ["Copyright"] = buienradarData.Buienradar.Copyright,

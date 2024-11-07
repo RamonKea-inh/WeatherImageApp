@@ -10,6 +10,6 @@
         string WeatherDescription,
         decimal Temperature,
         decimal FeelTemperature,
-        int WindSpeed,
+        decimal WindSpeed,
         string WindDirection);
 }

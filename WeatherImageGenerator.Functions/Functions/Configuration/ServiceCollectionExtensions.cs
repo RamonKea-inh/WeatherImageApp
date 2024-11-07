@@ -10,8 +10,8 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration)
     {
         // Register all weather services
-        services.AddHttpClient<BuienradarWeatherService>();
-        services.AddSingleton<IWeatherService, BuienradarWeatherService>();
+        services.AddHttpClient<WeatherService>();
+        services.AddSingleton<IWeatherService, WeatherService>();
 
         // Could add more weather services here
         // services.AddSingleton<IWeatherService, OpenWeatherMapService>();

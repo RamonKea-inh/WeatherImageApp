@@ -8,6 +8,6 @@ namespace WeatherImageGenerator.Domain.Interfaces
 {
     public interface IImageFacade
     {
-        Task<Result<byte[]>> GetRandomNatureImageAsync();
+        Task<Result<IReadOnlyList<string>>> GetWeatherImagesAsync(string jobId);
     }
 }

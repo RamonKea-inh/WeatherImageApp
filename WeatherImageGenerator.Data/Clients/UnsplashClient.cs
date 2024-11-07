@@ -18,8 +18,8 @@ namespace WeatherImageGenerator.Data.Clients
             _logger = logger;
             _accessKey = configuration["Unsplash:AccessKey"] ?? throw new WeatherServiceException("Unsplash API key not configured", ErrorCode.ImageServiceConfigurationError.ToString());
 
-            _httpClient.BaseAddress = new Uri("https://api.unsplash.com/");
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Client-ID {_accessKey}");
+            _httpClient.BaseAddress = new Uri("https://api.unsplash.com/"); // TODO : Move to configuration
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Client-ID {_accessKey}"); // TODO : Move to configuration
         }
 
         public async Task<Result<UnsplashResponse>> GetRandomPhotoAsync(string query)

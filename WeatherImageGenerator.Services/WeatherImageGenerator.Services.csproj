@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\WeatherImageGenerator.Data\WeatherImageGenerator.Data.csproj" />
     <ProjectReference Include="..\WeatherImageGenerator.Domain\WeatherImageGenerator.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Image\" />
     <Folder Include="Storage\" />
     <Folder Include="Weather\Models\" />
   </ItemGroup>

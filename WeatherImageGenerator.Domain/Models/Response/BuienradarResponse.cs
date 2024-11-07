@@ -3,49 +3,63 @@ using WeatherImageGenerator.Domain.Entities.Weather;
 
 namespace WeatherImageGenerator.Domain.Models.Response
 {
-    public record BuienradarResponse
+    public class BuienradarResponse
     {
-        [JsonPropertyName("$id")]
-        public string Id { get; init; } = string.Empty;
-
         [JsonPropertyName("buienradar")]
-        public BuienradarInfo Buienradar { get; init; } = new();
+        public Buienradar Buienradar { get; set; } = new();
 
         [JsonPropertyName("actual")]
-        public ActualInfo Actual { get; init; } = new();
-
-        [JsonPropertyName("stations")]
-        public List<WeatherStation> Stations { get; init; } = new();
+        public Actual Actual { get; set; } = new();
     }
 
-    public record BuienradarInfo
+    public class Buienradar
     {
-        [JsonPropertyName("$id")]
-        public string Id { get; init; } = string.Empty;
-
         [JsonPropertyName("copyright")]
-        public string Copyright { get; init; } = string.Empty;
+        public string Copyright { get; set; } = string.Empty;
 
         [JsonPropertyName("terms")]
-        public string Terms { get; init; } = string.Empty;
+        public string Terms { get; set; } = string.Empty;
     }
 
-    public record ActualInfo
+    public class Actual
     {
-        [JsonPropertyName("$id")]
-        public string Id { get; init; } = string.Empty;
+        [JsonPropertyName("stationmeasurements")]
+        public List<StationMeasurement> Stationmeasurements { get; set; } = new();
     }
 
-    public class UnsplashResponse
+    public class StationMeasurement
     {
-        public string Id { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public UnsplashUrls Urls { get; set; } = new UnsplashUrls();
-    }
+        [JsonPropertyName("stationid")]
+        public int Stationid { get; set; }
 
-    public class UnsplashUrls
-    {
-        public string Raw { get; set; } = string.Empty;
-        public string Regular { get; set; } = string.Empty;
+        [JsonPropertyName("stationname")]
+        public string Stationname { get; set; } = string.Empty;
+
+        [JsonPropertyName("lat")]
+        public decimal Lat { get; set; }
+
+        [JsonPropertyName("lon")]
+        public decimal Lon { get; set; }
+
+        [JsonPropertyName("regio")]
+        public string Regio { get; set; } = string.Empty;
+
+        [JsonPropertyName("timestamp")]
+        public DateTime Timestamp { get; set; }
+
+        [JsonPropertyName("weatherdescription")]
+        public string Weatherdescription { get; set; } = string.Empty;
+
+        [JsonPropertyName("temperature")]
+        public decimal Temperature { get; set; }
+
+        [JsonPropertyName("feeltemperature")]
+        public decimal Feeltemperature { get; set; }
+
+        [JsonPropertyName("windspeed")]
+        public decimal Windspeed { get; set; }
+
+        [JsonPropertyName("winddirection")]
+        public string Winddirection { get; set; } = string.Empty;
     }
 }
