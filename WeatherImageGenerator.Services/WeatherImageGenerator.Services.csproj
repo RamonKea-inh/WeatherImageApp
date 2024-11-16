@@ -1,13 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <Compile Remove="Weather\Models\**" />
+    <EmbeddedResource Remove="Weather\Models\**" />
+    <None Remove="Weather\Models\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\WeatherImageGenerator.Data\WeatherImageGenerator.Data.csproj" />
     <ProjectReference Include="..\WeatherImageGenerator.Domain\WeatherImageGenerator.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Storage\" />
-    <Folder Include="Weather\Models\" />
   </ItemGroup>
 
   <ItemGroup>

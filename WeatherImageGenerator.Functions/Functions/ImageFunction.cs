@@ -25,7 +25,7 @@ public class ImageFunction : BaseFunction
         {
             var queryParameters = HttpUtility.ParseQueryString(req.Url.Query);
             var query = queryParameters["query"] ?? "nature";
-            var count = int.TryParse(queryParameters["count"], out var parsedCount) ? parsedCount : 10;
+            var count = int.TryParse(queryParameters["count"], out var parsedCount) ? parsedCount : 10; // TODO: Change count to be equal to the requested amount of weather stations
 
             var imageResult = await _unsplashClient.GetRandomNaturePhotosAsync(query, count);
 
