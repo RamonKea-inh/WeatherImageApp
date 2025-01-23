@@ -4,7 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WeatherImageGenerator.Data.Clients;
 using WeatherImageGenerator.Data.Configuration;
+using WeatherImageGenerator.Domain.Interfaces;
 using WeatherImageGenerator.Functions.Middleware;
+using WeatherImageGenerator.Services.Image;
 
 var host = new HostBuilder()
     .ConfigureAppConfiguration((context, config) =>
@@ -32,6 +34,13 @@ var host = new HostBuilder()
         // Register HttpClient and UnsplashClient
         services.AddHttpClient<UnsplashClient>();
         services.AddLogging();
+
+        // Register ImageService
+        services.AddScoped<IImageService, ImageService>();
+    })
+    .ConfigureFunctionsWorkerDefaults(worker =>
+    {
+        worker.UseMiddleware<ExceptionHandlingMiddleware>();
     })
     .Build();
 
