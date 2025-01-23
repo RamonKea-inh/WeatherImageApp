@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
+using WeatherImageGenerator.Data.Configuration;
 using WeatherImageGenerator.Domain.Exceptions;
 using WeatherImageGenerator.Domain.Models.Response;
 
@@ -9,17 +10,27 @@ namespace WeatherImageGenerator.Data.Clients
     public class UnsplashClient
     {
         private readonly HttpClient _httpClient;
-        private readonly string _accessKey;
+        private readonly UnsplashSettings _unsplashSettings;
         private readonly ILogger<UnsplashClient> _logger;
 
-        public UnsplashClient(HttpClient httpClient, IConfiguration configuration, ILogger<UnsplashClient> logger)
+        public UnsplashClient(
+            HttpClient httpClient,
+            IOptions<UnsplashSettings> unsplashOptions,
+            ILogger<UnsplashClient> logger)
         {
             _httpClient = httpClient;
             _logger = logger;
-            _accessKey = configuration["Unsplash:AccessKey"] ?? throw new WeatherServiceException("Unsplash API key not configured", ErrorCode.ImageServiceConfigurationError.ToString());
+            _unsplashSettings = unsplashOptions.Value;
 
-            _httpClient.BaseAddress = new Uri("https://api.unsplash.com/"); // TODO : Move to configuration
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Client-ID {_accessKey}"); // TODO : Move to configuration
+            if (string.IsNullOrEmpty(_unsplashSettings.AccessKey))
+            {
+                throw new WeatherServiceException(
+                    "Unsplash API key not configured",
+                    ErrorCode.ImageServiceConfigurationError.ToString());
+            }
+
+            _httpClient.BaseAddress = new Uri(_unsplashSettings.BaseAddress);
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Client-ID {_unsplashSettings.AccessKey}");
         }
 
         public async Task<Result<List<UnsplashResponse>>> GetRandomNaturePhotosAsync(string query, int count)
