@@ -1,8 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Queues;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using WeatherImageGenerator.Data.Configuration;
 using WeatherImageGenerator.Domain.Configuration;
 using WeatherImageGenerator.Domain.Interfaces;
 using WeatherImageGenerator.Services.Image;
+using WeatherImageGenerator.Services.Jobs;
 using WeatherImageGenerator.Services.Weather;
 
 public static class ServiceCollectionExtensions
@@ -10,6 +14,37 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddWeatherServices(this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddSingleton(sp =>
+        {
+            var connectionString = configuration["AzureWebJobsStorage"];
+            return new QueueServiceClient(connectionString);
+        });
+
+        services.AddSingleton(sp =>
+        {
+            var connectionString = configuration["AzureWebJobsStorage"];
+            return new BlobServiceClient(connectionString);
+        });
+
+        // Configure Azure Queue and Blob clients
+        services.AddSingleton(sp =>
+        {
+            var queueServiceClient = sp.GetRequiredService<QueueServiceClient>();
+            var queueClient = queueServiceClient.GetQueueClient("image-generation-queue");
+
+            // Create the queue if it doesn't exist
+            queueClient.CreateIfNotExists();
+
+            return queueClient;
+        });
+
+        services.AddSingleton(sp =>
+        {
+            var blobServiceClient = sp.GetRequiredService<BlobServiceClient>();
+            return blobServiceClient.GetBlobContainerClient("weather-images");
+        });
+
+
         // Register all weather services
         services.AddHttpClient<WeatherService>();
         services.AddSingleton<IWeatherService, WeatherService>();
@@ -17,9 +52,11 @@ public static class ServiceCollectionExtensions
         // Register all image services
         services.AddSingleton<IImageService, ImageService>();
         services.AddSingleton<IImageOverlayService, ImageOverlayService>();
+        services.AddSingleton<IImageJobService, ImageJobService>();
 
-        services.Configure<WeatherServiceOptions>(
-            configuration.GetSection("WeatherService"));
+        services.Configure<UnsplashSettings>(configuration.GetSection("Unsplash"));
+
+        services.Configure<WeatherServiceOptions>(configuration.GetSection("WeatherService"));
 
         services.AddMemoryCache();
 
