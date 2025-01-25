@@ -7,6 +7,7 @@ using WeatherImageGenerator.Domain.Configuration;
 using WeatherImageGenerator.Domain.Interfaces;
 using WeatherImageGenerator.Services.Image;
 using WeatherImageGenerator.Services.Jobs;
+using WeatherImageGenerator.Services.Storage;
 using WeatherImageGenerator.Services.Weather;
 
 public static class ServiceCollectionExtensions
@@ -14,16 +15,17 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddWeatherServices(this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddSingleton(sp =>
+        services.AddScoped<IBlobStorageService>(provider =>
         {
+            var configuration = provider.GetRequiredService<IConfiguration>();
             var connectionString = configuration["AzureWebJobsStorage"];
-            return new QueueServiceClient(connectionString);
+            return new BlobStorageService(connectionString);
         });
 
         services.AddSingleton(sp =>
         {
             var connectionString = configuration["AzureWebJobsStorage"];
-            return new BlobServiceClient(connectionString);
+            return new QueueServiceClient(connectionString);
         });
 
         // Configure Azure Queue and Blob clients
@@ -32,16 +34,9 @@ public static class ServiceCollectionExtensions
             var queueServiceClient = sp.GetRequiredService<QueueServiceClient>();
             var queueClient = queueServiceClient.GetQueueClient("image-generation-queue");
 
-            // Create the queue if it doesn't exist
             queueClient.CreateIfNotExists();
 
             return queueClient;
-        });
-
-        services.AddSingleton(sp =>
-        {
-            var blobServiceClient = sp.GetRequiredService<BlobServiceClient>();
-            return blobServiceClient.GetBlobContainerClient("weather-images");
         });
 
 
