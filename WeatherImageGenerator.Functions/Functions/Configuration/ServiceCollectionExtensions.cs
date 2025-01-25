@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using WeatherImageGenerator.Domain.Configuration;
 using WeatherImageGenerator.Domain.Interfaces;
+using WeatherImageGenerator.Services.Image;
 using WeatherImageGenerator.Services.Weather;
 
 public static class ServiceCollectionExtensions
@@ -13,14 +14,14 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<WeatherService>();
         services.AddSingleton<IWeatherService, WeatherService>();
 
-        // Could add more weather services here
-        // services.AddSingleton<IWeatherService, OpenWeatherMapService>();
+        // Register all image services
+        services.AddSingleton<IImageService, ImageService>();
+        services.AddSingleton<IImageOverlayService, ImageOverlayService>();
 
         services.Configure<WeatherServiceOptions>(
             configuration.GetSection("WeatherService"));
 
         services.AddMemoryCache();
-        services.AddSingleton<IWeatherFacade, WeatherFacade>();
 
         return services;
     }

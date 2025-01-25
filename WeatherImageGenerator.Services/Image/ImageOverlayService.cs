@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using WeatherImageGenerator.Domain.Entities.Image;
 using WeatherImageGenerator.Domain.Entities.Weather;
 using WeatherImageGenerator.Domain.Interfaces;
@@ -24,7 +27,7 @@ namespace WeatherImageGenerator.Services.Image
             try
             {
                 var imageStream = await _httpClient.GetStreamAsync(imageUrl);
-                var image = await Image.LoadAsync<Rgba32>(imageStream);
+                var image = null as Image<Rgba32>; // TODD: Load image from stream
 
                 var font = SystemFonts.CreateFont("Arial", 24);
                 var text = $"Station: {weatherStation.StationName}\n" +
@@ -55,8 +58,7 @@ namespace WeatherImageGenerator.Services.Image
 
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddHttpClient<IImageOverlayService, ImageOverlayService>();
-            // Register other services
+            
         }
     }
 }

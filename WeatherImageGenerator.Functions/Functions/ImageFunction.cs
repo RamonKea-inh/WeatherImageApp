@@ -7,12 +7,10 @@ using WeatherImageGenerator.Domain.Interfaces;
 
 public class ImageFunction : BaseFunction
 {
-    private readonly IWeatherFacade _weatherFacade;
     private readonly UnsplashClient _unsplashClient;
 
-    public ImageFunction(IWeatherFacade weatherFacade, UnsplashClient unsplashClient, ILogger<ImageFunction> logger) : base(logger)
+    public ImageFunction(UnsplashClient unsplashClient, ILogger<ImageFunction> logger) : base(logger)
     {
-        _weatherFacade = weatherFacade;
         _unsplashClient = unsplashClient;
     }
 
