@@ -1,20 +1,43 @@
-using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Text.Json;
+using WeatherImageGenerator.Domain.Configuration;
 using WeatherImageGenerator.Domain.Entities.Weather;
 using WeatherImageGenerator.Domain.Interfaces;
 using WeatherImageGenerator.Domain.Models.Weather;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
-using static WeatherFunction;
-using WeatherImageGenerator.Domain.Configuration;
-using System.Text.Json;
+using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Azure.Functions.Worker;
 
-public class WeatherFunction(ILogger logger) : BaseFunction(logger)
+public class WeatherFunction : BaseFunction
 {
     private readonly IEnumerable<IWeatherService> _weatherServices;
     private readonly IMemoryCache _cache;
     private readonly WeatherServiceOptions _options;
+
+    public WeatherFunction(
+        ILogger<WeatherFunction> logger,
+        IEnumerable<IWeatherService> weatherServices,
+        IMemoryCache cache,
+        IOptions<WeatherServiceOptions> options)
+        : base(logger)
+    {
+        _weatherServices = weatherServices;
+        _cache = cache;
+        _options = options.Value;
+    }
+
+    [Function("GetWeatherStations")]
+    public async Task<HttpResponseData> GetWeatherStations(
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "weather/stations")] HttpRequestData req)
+    {
+        var result = await GetWeatherStationsAsync();
+
+        var response = req.CreateResponse(System.Net.HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(result);
+
+        return response;
+    }
 
     public async Task<Result<WeatherData>> GetWeatherInformationAsync()
     {
@@ -111,7 +134,7 @@ public class WeatherFunction(ILogger logger) : BaseFunction(logger)
         return Result<WeatherStation>.Success(station);
     }
 
-    private Result<IWeatherService> GetWeatherService()
+    public Result<IWeatherService> GetWeatherService()
     {
         var service = _weatherServices.FirstOrDefault();
 
