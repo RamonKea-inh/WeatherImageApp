@@ -11,6 +11,10 @@ param (
 Write-Host "Publishing the .NET project..."
 dotnet publish WeatherImageGenerator.Functions/WeatherImageGenerator.Functions.csproj -c Release -o ./publish
 
+# Create a zip file of the published output
+Write-Host "Creating a zip file of the published output..."
+Compress-Archive -Path ./publish/* -DestinationPath ./publish.zip
+
 # Create the resource group if it doesn't exist
 Write-Host "Creating resource group..."
 az group create --name $resourceGroupName --location $location
