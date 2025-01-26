@@ -1,0 +1,12 @@
+### Get Weather Stations
+# This endpoint retrieves weather stations data.
+# Method: GET
+# URL: http://localhost:7071/api/weather/stations
+# Request Headers:
+#   Content-Type: application/json
+# Response:
+#   200 OK - Returns a list of weather stations.
+# Trigger: HTTP GET request
+
+GET http://localhost:7071/api/weather/stations
+Content-Type: application/json
