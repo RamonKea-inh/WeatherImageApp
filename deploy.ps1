@@ -21,7 +21,7 @@ az group create --name $resourceGroupName --location $location
 
 # Deploy the Bicep template
 Write-Host "Deploying the Bicep template..."
-az deployment group create --resource-group $resourceGroupName --template-file ./Infrastructure/main.bicep --parameters functionAppName=$functionAppName storageAccountName=$storageAccountName appInsightsName=$appInsightsName location=$location
+az deployment group create --resource-group $resourceGroupName --template-file ./main.bicep --parameters functionAppName=$functionAppName storageAccountName=$storageAccountName appInsightsName=$appInsightsName location=$location
 
 # Deploy the function app
 Write-Host "Deploying the function app..."
