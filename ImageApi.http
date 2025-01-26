@@ -1,0 +1,15 @@
+### Get Images
+# This endpoint retrieves a list of images based on a query.
+# Method: GET
+# URL: http://localhost:7071/api/images
+# Request Headers:
+#   Content-Type: application/json
+# Query Parameters:
+#   query - The search term for the images (default: "nature").
+#   count - The number of images to retrieve (default: 30, because it's rate limited at 30 per request).
+# Response:
+#   200 OK - Returns a list of image URLs.
+# Trigger: HTTP GET request
+
+GET http://localhost:7071/api/images?query=nature&count=30
+Content-Type: application/json

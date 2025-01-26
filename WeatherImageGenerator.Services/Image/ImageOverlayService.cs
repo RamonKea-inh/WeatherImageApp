@@ -1,10 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+﻿using Microsoft.Extensions.Logging;
+using SkiaSharp;
 using WeatherImageGenerator.Domain.Entities.Image;
 using WeatherImageGenerator.Domain.Entities.Weather;
 using WeatherImageGenerator.Domain.Interfaces;
@@ -26,39 +21,71 @@ namespace WeatherImageGenerator.Services.Image
         {
             try
             {
-                var imageStream = await _httpClient.GetStreamAsync(imageUrl);
-                var image = null as Image<Rgba32>; // TODD: Load image from stream
+                // Download image bytes
+                byte[] imageBytes = await _httpClient.GetByteArrayAsync(imageUrl);
 
-                var font = SystemFonts.CreateFont("Arial", 24);
-                var text = $"Station: {weatherStation.StationName}\n" +
-                           $"Temperature: {weatherStation.Temperature}°C\n" +
-                           $"Wind: {weatherStation.WindSpeed} km/h {weatherStation.WindDirection}";
-
-                image.Mutate(ctx => ctx.DrawText(text, font, Color.White, new PointF(10, 10)));
-
-                using var memoryStream = new MemoryStream();
-                await image.SaveAsync(memoryStream, new SixLabors.ImageSharp.Formats.Png.PngEncoder());
-                var imageData = memoryStream.ToArray();
-
-                var weatherImage = new WeatherImage
+                // Load image with SkiaSharp
+                using (var bitmap = SKBitmap.Decode(imageBytes))
+                using (var canvas = new SKCanvas(bitmap))
                 {
-                    Id = Guid.NewGuid(),
-                    ImageData = imageData,
-                    BlobUrl = imageUrl // This will be updated with the actual Blob URL after uploading
-                };
+                    // Create font
+                    using var font = new SKFont
+                    {
+                        Size = 24,
+                        Typeface = SKTypeface.FromFamilyName("Arial")
+                    };
 
-                return weatherImage;
+                    // Create paint for text outline
+                    using var blackPaint = new SKPaint
+                    {
+                        Color = SKColors.Black,
+                        Style = SKPaintStyle.Stroke,
+                        StrokeWidth = 1,
+                        IsAntialias = true
+                    };
+
+                    // Create paint for text fill
+                    using var whitePaint = new SKPaint
+                    {
+                        Color = SKColors.White,
+                        Style = SKPaintStyle.Fill,
+                        IsAntialias = true
+                    };
+
+                    string text = $"Station: {weatherStation.StationName}\n" +
+                                  $"Temperature: {weatherStation.Temperature}°C\n" +
+                                  $"Wind: {weatherStation.WindSpeed} km/h {weatherStation.WindDirection}";
+
+                    float y = 30;
+                    foreach (var line in text.Split('\n'))
+                    {
+                        canvas.DrawText(line, 10, y, SKTextAlign.Left, font, blackPaint);
+                        canvas.DrawText(line, 10, y, SKTextAlign.Left, font, whitePaint);
+                        y += font.Size + 10;
+                    }
+
+                    // Convert bitmap back to byte array
+                    using (var image = SKImage.FromBitmap(bitmap))
+                    using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
+                    {
+                        var imageData = data.ToArray();
+
+                        var weatherImage = new WeatherImage
+                        {
+                            Id = Guid.NewGuid(),
+                            ImageData = imageData,
+                            BlobUrl = imageUrl
+                        };
+
+                        return weatherImage;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while overlaying weather data on image");
                 return null;
             }
-        }
-
-        public void ConfigureServices(IServiceCollection services)
-        {
-            
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using WeatherImageGenerator.Data.Clients;
 using WeatherImageGenerator.Domain.Interfaces;
-using WeatherImageGenerator.Domain.Models.Response;
 
 namespace WeatherImageGenerator.Services.Image
 {

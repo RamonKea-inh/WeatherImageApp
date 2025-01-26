@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -48,11 +46,11 @@ namespace WeatherImageGenerator.Functions.Functions
                 return Result<ImageJobStatus>.Success(jobStatus);
             }, "GetImageJobStatus");
         }
-            
+
         [Function("ProcessImageGenerationJob")]
         public async Task ProcessJob(
             [QueueTrigger("image-generation-queue", Connection = "AzureWebJobsStorage")] string jobId)
-           {
+        {
             try
             {
                 await _imageJobService.ProcessImageGenerationJobAsync(jobId);

@@ -1,0 +1,39 @@
+### Start Image Generation Job
+# This endpoint starts a new image generation job.
+# Method: POST
+# URL: http://localhost:7071/api/image-jobs
+# Request Headers:
+#   Content-Type: application/json
+# Response:
+#   200 OK - Returns the job ID of the newly created job.
+# Trigger: HTTP POST request
+
+POST http://localhost:7071/api/image-jobs
+Content-Type: application/json
+
+### Get Image Job Status
+# This endpoint retrieves the status of an image generation job.
+# Method: GET
+# URL: http://localhost:7071/api/image-jobs/{jobId}
+# Request Headers:
+#   Content-Type: application/json
+# Path Parameters:
+#   jobId - The ID of the job to retrieve the status for.
+# Response:
+#   200 OK - Returns the status of the job.
+#   404 Not Found - If the job ID does not exist.
+# Trigger: HTTP GET request
+
+GET http://localhost:7071/api/image-jobs/{jobId}
+Content-Type: application/json
+
+# Replace {jobId} with an actual job ID to test the endpoint.
+
+### Process Image Generation Job
+# This function processes the image generation job.
+# Trigger: Queue message in "image-generation-queue"
+# Azure Services Used:
+#   - Azure Functions
+#   - Azure Storage Queues
+
+# This function is triggered automatically by a message in the "image-generation-queue".

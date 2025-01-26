@@ -1,5 +1,4 @@
-﻿using Azure.Storage.Blobs;
-using Azure.Storage.Queues;
+﻿using Azure.Storage.Queues;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using WeatherImageGenerator.Data.Clients;
@@ -11,9 +10,11 @@ namespace WeatherImageGenerator.Services.Jobs
 {
     public class ImageJobService : IImageJobService
     {
+        private const int MaxImageCount = 30; // Limit to 30 images, because of Unsplash API limits
+
         private readonly ILogger<ImageJobService> _logger;
         private readonly QueueClient _jobQueueClient;
-        private readonly BlobContainerClient _imageContainerClient;
+        private readonly IBlobStorageService _blobStorageService;
         private readonly IWeatherService _weatherService;
         private readonly UnsplashClient _unsplashClient;
         private readonly IImageOverlayService _imageOverlayService;
@@ -25,14 +26,14 @@ namespace WeatherImageGenerator.Services.Jobs
         public ImageJobService(
             ILogger<ImageJobService> logger,
             QueueClient jobQueueClient,
-            BlobContainerClient imageContainerClient,
+            IBlobStorageService blobStorageService,
             IWeatherService weatherService,
             UnsplashClient unsplashClient,
             IImageOverlayService imageOverlayService)
         {
             _logger = logger;
             _jobQueueClient = jobQueueClient;
-            _imageContainerClient = imageContainerClient;
+            _blobStorageService = blobStorageService;
             _weatherService = weatherService;
             _unsplashClient = unsplashClient;
             _imageOverlayService = imageOverlayService;
@@ -80,10 +81,13 @@ namespace WeatherImageGenerator.Services.Jobs
                 // Retrieve weather stations
                 var weatherData = await _weatherService.GetWeatherDataAsync();
 
+                // Determine the number of images to request
+                int imageCount = Math.Min(weatherData.Stations.Count, MaxImageCount);
+
                 // Get random nature images
                 var imageResult = await _unsplashClient.GetRandomNaturePhotosAsync(
                     "nature",
-                    weatherData.Stations.Count
+                    imageCount
                 );
 
                 if (!imageResult.IsSuccess)
@@ -96,22 +100,33 @@ namespace WeatherImageGenerator.Services.Jobs
                 // Generate images for each weather station
                 for (int i = 0; i < weatherData.Stations.Count; i++)
                 {
+                    // Get image URL and weather station data use modulo to cycle through images when there are fewer images than stations
+                    var imageUrl = imageResult.Data[i % imageResult.Data.Count].Urls.Regular;
                     var station = weatherData.Stations[i];
-                    var imageUrl = imageResult.Data[i].Urls.Regular;
 
                     // Overlay weather data on image
                     var weatherImage = await _imageOverlayService.OverlayWeatherDataOnImageAsync(imageUrl, station);
 
                     if (weatherImage != null)
                     {
-                        // Upload to blob storage
-                        var blobName = $"{weatherImage.Id}.png";
-                        var blobClient = _imageContainerClient.GetBlobClient(blobName);
+                        try
+                        {
+                            // Use the new blob storage service
+                            var blobName = $"{weatherImage.Id}.png";
+                            using var imageStream = new MemoryStream(weatherImage.ImageData);
 
-                        using var imageStream = new MemoryStream(weatherImage.ImageData);
-                        await blobClient.UploadAsync(imageStream);
+                            var blobUrl = await _blobStorageService.UploadBlobAsync(
+                                "weather-images",
+                                blobName,
+                                imageStream
+                            );
 
-                        generatedImages.Add(blobClient.Uri.AbsoluteUri);
+                            generatedImages.Add(blobUrl);
+                        }
+                        catch (Exception uploadEx)
+                        {
+                            _logger.LogError(uploadEx, $"Failed to upload image for station {station.StationId}");
+                        }
                     }
                 }
 
@@ -119,9 +134,10 @@ namespace WeatherImageGenerator.Services.Jobs
                 _jobStatuses[jobId] = new ImageJobStatus
                 {
                     JobId = jobId,
-                    State = JobState.Completed,
+                    State = generatedImages.Any() ? JobState.Completed : JobState.Failed,
                     CompletedAt = DateTime.UtcNow,
-                    ImageUrls = generatedImages
+                    ImageUrls = generatedImages,
+                    ErrorMessage = !generatedImages.Any() ? "No images could be uploaded" : null
                 };
             }
             catch (Exception ex)

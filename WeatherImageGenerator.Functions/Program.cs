@@ -9,8 +9,8 @@ var host = new HostBuilder()
     {
         var env = context.HostingEnvironment;
         config.SetBasePath(Environment.CurrentDirectory)
-              .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
               .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
+              .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
               .AddEnvironmentVariables();
 
         var builtConfig = config.Build();

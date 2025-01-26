@@ -1,9 +1,9 @@
-﻿using Microsoft.Azure.Functions.Worker.Middleware;
-using Microsoft.Azure.Functions.Worker;
+﻿using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using WeatherImageGenerator.Domain.Exceptions;
-using Microsoft.Azure.Functions.Worker.Http;
 
 namespace WeatherImageGenerator.Functions.Middleware
 {
