@@ -131,10 +131,6 @@ The application requires configuration settings for various services. These sett
    - **Description**: Retrieves a list of images based on a query.
    - **Response**: Returns a list of image URLs.
 
-## Contributing
-
-Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) for more information.
-
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
