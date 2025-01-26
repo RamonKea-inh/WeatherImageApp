@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using WeatherImageGenerator.Domain.Entities.Weather;
 
 namespace WeatherImageGenerator.Domain.Models.Response
 {

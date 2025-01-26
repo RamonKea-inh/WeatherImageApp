@@ -1,3 +1,5 @@
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -6,8 +8,6 @@ using WeatherImageGenerator.Domain.Configuration;
 using WeatherImageGenerator.Domain.Entities.Weather;
 using WeatherImageGenerator.Domain.Interfaces;
 using WeatherImageGenerator.Domain.Models.Weather;
-using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Azure.Functions.Worker;
 
 public class WeatherFunction : BaseFunction
 {

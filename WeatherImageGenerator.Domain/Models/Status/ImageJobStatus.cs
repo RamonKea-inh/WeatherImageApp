@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 using WeatherImageGenerator.Domain.Enums;
 
 namespace WeatherImageGenerator.Domain.Models.Status
@@ -10,6 +6,7 @@ namespace WeatherImageGenerator.Domain.Models.Status
     public class ImageJobStatus
     {
         public string JobId { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public JobState State { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }

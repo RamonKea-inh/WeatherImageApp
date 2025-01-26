@@ -1,5 +1,4 @@
-﻿using Azure.Storage.Blobs;
-using Azure.Storage.Queues;
+﻿using Azure.Storage.Queues;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using WeatherImageGenerator.Data.Clients;
