@@ -11,6 +11,8 @@ namespace WeatherImageGenerator.Services.Jobs
 {
     public class ImageJobService : IImageJobService
     {
+        private const int MaxImageCount = 30; // Limit to 30 images, because of Unsplash API limits
+
         private readonly ILogger<ImageJobService> _logger;
         private readonly QueueClient _jobQueueClient;
         private readonly IBlobStorageService _blobStorageService;
@@ -80,10 +82,13 @@ namespace WeatherImageGenerator.Services.Jobs
                 // Retrieve weather stations
                 var weatherData = await _weatherService.GetWeatherDataAsync();
 
+                // Determine the number of images to request
+                int imageCount = Math.Min(weatherData.Stations.Count, MaxImageCount);
+
                 // Get random nature images
                 var imageResult = await _unsplashClient.GetRandomNaturePhotosAsync(
                     "nature",
-                    weatherData.Stations.Count
+                    imageCount
                 );
 
                 if (!imageResult.IsSuccess)
@@ -96,8 +101,9 @@ namespace WeatherImageGenerator.Services.Jobs
                 // Generate images for each weather station
                 for (int i = 0; i < weatherData.Stations.Count; i++)
                 {
+                    // Get image URL and weather station data use modulo to cycle through images when there are fewer images than stations
+                    var imageUrl = imageResult.Data[i % imageResult.Data.Count].Urls.Regular;
                     var station = weatherData.Stations[i];
-                    var imageUrl = imageResult.Data[i].Urls.Regular;
 
                     // Overlay weather data on image
                     var weatherImage = await _imageOverlayService.OverlayWeatherDataOnImageAsync(imageUrl, station);

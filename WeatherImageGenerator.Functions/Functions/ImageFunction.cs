@@ -3,17 +3,16 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using System.Web;
 using WeatherImageGenerator.Data.Clients;
-using WeatherImageGenerator.Domain.Interfaces;
 
 public class ImageFunction : BaseFunction
 {
+    private const int DefaultImageCount = 40;
     private readonly UnsplashClient _unsplashClient;
 
     public ImageFunction(UnsplashClient unsplashClient, ILogger<ImageFunction> logger) : base(logger)
     {
         _unsplashClient = unsplashClient;
     }
-
 
     [Function("GetImages")]
     public async Task<HttpResponseData> GetImages(
@@ -23,7 +22,7 @@ public class ImageFunction : BaseFunction
         {
             var queryParameters = HttpUtility.ParseQueryString(req.Url.Query);
             var query = queryParameters["query"] ?? "nature";
-            var count = int.TryParse(queryParameters["count"], out var parsedCount) ? parsedCount : 10; // TODO: Change count to be equal to the requested amount of weather stations
+            var count = int.TryParse(queryParameters["count"], out var parsedCount) ? parsedCount : DefaultImageCount;
 
             var imageResult = await _unsplashClient.GetRandomNaturePhotosAsync(query, count);
 

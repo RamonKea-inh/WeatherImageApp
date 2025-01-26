@@ -1,15 +1,11 @@
 using Azure.Storage.Queues;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-//using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using WeatherImageGenerator.Data.Clients;
 using WeatherImageGenerator.Domain.Entities.Image;
 using WeatherImageGenerator.Domain.Entities.Weather;
 using WeatherImageGenerator.Domain.Interfaces;
-using WeatherImageGenerator.Services.Weather;
 
 namespace WeatherImageGenerator.Functions.Functions
 {
@@ -20,19 +16,22 @@ namespace WeatherImageGenerator.Functions.Functions
         private readonly ILogger<ImageProcessingFunction> _logger;
         private readonly IWeatherService _weatherService;
         private readonly QueueClient _queueClient;
+        private readonly IBlobStorageService _blobStorageService;
 
         public ImageProcessingFunction(
             UnsplashClient unsplashClient,
             IImageOverlayService imageOverlayService,
             ILogger<ImageProcessingFunction> logger,
             IWeatherService weatherService,
-            QueueClient queueClient)
+            QueueClient queueClient,
+            IBlobStorageService blobStorageService)
         {
             _unsplashClient = unsplashClient;
             _imageOverlayService = imageOverlayService;
             _logger = logger;
             _weatherService = weatherService;
             _queueClient = queueClient;
+            _blobStorageService = blobStorageService;
         }
 
 
@@ -138,10 +137,37 @@ namespace WeatherImageGenerator.Functions.Functions
 
         public async Task<string> SaveImageToBlobStorageAsync(WeatherImage image)
         {
-            // TODO: Implement actual Blob Storage saving logic here.
-            // For demonstration, returning a placeholder URL.
-            await Task.Delay(100); // Simulate async work
-            return $"https://yourstorageaccount.blob.core.windows.net/images/{image.Id}.png";
+            try
+            {
+                // Validate input
+                if (image?.ImageData == null)
+                {
+                    _logger.LogError("Cannot save null image");
+                    return null;
+                }
+
+                // Generate a unique blob name using the image's ID
+                string blobName = $"weather-station-{image.Id}.png";
+
+                // Create a stream from the image data
+                using var imageStream = new MemoryStream(image.ImageData);
+
+                // Using the blob storage service to upload the image
+                var blobUrl = await _blobStorageService.UploadBlobAsync(
+                    containerName: "weather-images",
+                    blobName: blobName,
+                    content: imageStream
+                );
+
+                _logger.LogInformation($"Successfully uploaded image {blobName} to blob storage");
+
+                return blobUrl;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error saving image {image?.Id} to blob storage");
+                return null;
+            }
         }
     }
 }
