@@ -11,6 +11,23 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeatherImageGenerator.Data"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeatherImageGenerator.Functions", "WeatherImageGenerator.Functions\WeatherImageGenerator.Functions.csproj", "{728625FC-B213-46CF-88EF-839E0C24A3C2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiDocumentation", "ApiDocumentation", "{BD5DF89F-EEBF-46AD-8DB2-2614FFA989DE}"
+	ProjectSection(SolutionItems) = preProject
+		ImageApi.http = ImageApi.http
+		ImageJobApi.http = ImageJobApi.http
+		WeatherApi.http = WeatherApi.http
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{0C37DB88-04B7-4858-A2DE-158F0D77A012}"
+	ProjectSection(SolutionItems) = preProject
+		main.bicep = main.bicep
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{099213E0-CAB1-4557-81ED-0EB57BAD5A78}"
+	ProjectSection(SolutionItems) = preProject
+		deploy.ps1 = deploy.ps1
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
